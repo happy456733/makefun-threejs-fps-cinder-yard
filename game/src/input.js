@@ -26,6 +26,11 @@ export function createInput(canvas, onLockChange) {
   });
   window.addEventListener('mousemove', (event) => {
     if (!state.locked) return;
+    // Drop implausible single-event jumps: a real mouse reports small deltas per
+    // event (a violent flick is under ~80 px even on a 125 Hz mouse), so a jump
+    // over 150 px is a synthetic or glitched event, never a hand. Without this,
+    // one such event can spin the view to the stops.
+    if (Math.abs(event.movementX) > 150 || Math.abs(event.movementY) > 150) return;
     state.lookX += event.movementX;
     state.lookY += event.movementY;
   });
