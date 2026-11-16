@@ -30,12 +30,12 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'hi
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 document.getElementById('game').appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(PALETTE.canvas);
-scene.fog = new THREE.Fog(new THREE.Color(PALETTE.canvas), 30, 95);
+scene.fog = new THREE.Fog(new THREE.Color(PALETTE.canvas), 42, 110);
 const camera = new THREE.PerspectiveCamera(74, window.innerWidth / window.innerHeight, 0.05, 220);
 scene.add(camera);
 
@@ -212,6 +212,7 @@ function onLockChange(locked) {
 
 function onPlay() {
   audio.resume();
+  arsenal.setVisible(true);
   if (state.phase === 'menu') rounds.startMatch();
   hud.hideOverlay();
   input.requestLock();
@@ -219,6 +220,7 @@ function onPlay() {
 
 function onRestart() {
   audio.resume();
+  arsenal.setVisible(true);
   rounds.startMatch();
   hud.hideOverlay();
   input.requestLock();
@@ -341,7 +343,7 @@ function pushHud() {
   hud.setHealth(player.health, player.armor);
   hud.setAmmo(arsenal.mag(), arsenal.reserve(), arsenal.currentDef().name, arsenal.reloading());
   hud.setMoney(state.money);
-  hud.setTimer(Math.max(0, state.timer), state.phase);
+  hud.setTimer(Math.max(0, state.phase === 'menu' ? TIMING.round : state.timer), state.phase);
   hud.setScore(state.wins.ember, state.wins.warden, state.round);
   hud.setAlive((player.alive ? 1 : 0) + bots.aliveCount('ember'), bots.aliveCount('warden'));
   hud.setGrenades(state.loadout.grenades);
@@ -452,7 +454,6 @@ function step(dt) {
   });
   updateChargeMesh();
   updateHitboxes();
-  pushHud();
 }
 
 let accumulator = 0;
@@ -460,7 +461,7 @@ let lastTime = performance.now();
 
 function frame(now) {
   requestAnimationFrame(frame);
-  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  const dt = Math.min((now - lastTime) / 1000, 0.25);
   lastTime = now;
   const look = input.takeLook();
   if (input.state.locked && player.alive && (state.phase === 'live' || state.phase === 'freeze')) {
@@ -470,13 +471,14 @@ function frame(now) {
   handleFiring(now);
   accumulator += dt;
   let steps = 0;
-  while (accumulator >= FIXED_STEP && steps < 5) {
+  while (accumulator >= FIXED_STEP && steps < 12) {
     step(FIXED_STEP);
     accumulator -= FIXED_STEP;
     steps += 1;
   }
-  if (accumulator > FIXED_STEP * 5) accumulator = 0;
+  if (accumulator > FIXED_STEP * 12) accumulator = 0;
   effects.step(dt);
+  pushHud();
   syncCamera();
   renderer.render(scene, camera);
   input.drainPressed();
@@ -488,9 +490,14 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+// A read-only handle for debugging and playtesting in the browser console.
+window.__cinder = { state, player, camera, bots, world };
+
 // The menu vista: the yard from the EMBER spawn corner, bots waiting at theirs.
+// The view model stays hidden until the match starts.
 camera.position.set(-25.5, 3.4, 19.5);
 camera.lookAt(-2, 1, -8);
+arsenal.setVisible(false);
 bots.reset(world.spawns);
 pushHud();
 hud.showOverlay('start');

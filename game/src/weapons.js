@@ -12,9 +12,10 @@ const BLOOM_MAX = 0.032;
 
 function buildModel(def) {
   const dark = new THREE.MeshStandardMaterial({ color: new THREE.Color(PALETTE.hairline), roughness: 0.65, metalness: 0.3 });
-  const metal = new THREE.MeshStandardMaterial({ color: new THREE.Color(PALETTE.ink), roughness: 0.45, metalness: 0.5 });
+  const metal = new THREE.MeshStandardMaterial({ color: new THREE.Color(PALETTE.wall), roughness: 0.45, metalness: 0.55 });
   const accent = new THREE.MeshStandardMaterial({ color: new THREE.Color(PALETTE.rust), roughness: 0.6, metalness: 0.2 });
   const model = new THREE.Group();
+  model.scale.setScalar(0.8);
   const add = (geo, mat, x, y, z, rx = 0) => {
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(x, y, z);
@@ -69,6 +70,7 @@ export function createArsenal(camera) {
   for (const def of Object.values(WEAPONS)) ammo[def.id] = { mag: def.mag, reserve: def.reserve };
   const owned = new Set(['p9']);
   let current = 'p9';
+  let shown = true;
   let cooldown = 0;
   let reloadLeft = 0;
   let reloadTotal = 1;
@@ -132,10 +134,14 @@ export function createArsenal(camera) {
       if (!owned.has(id) || id === current) return false;
       models[current].visible = false;
       current = id;
-      models[current].visible = true;
+      models[current].visible = shown;
       reloadLeft = 0;
       cooldown = Math.max(cooldown, 0.18);
       return true;
+    },
+    setVisible(value) {
+      shown = value;
+      models[current].visible = value;
     },
     dropPrimary() {
       for (const id of [...owned]) if (WEAPONS[id].kind !== 'pistol') owned.delete(id);

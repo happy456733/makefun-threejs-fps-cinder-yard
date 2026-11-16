@@ -193,9 +193,9 @@ export function createWorld(scene) {
 
   // Light: a low warm key from the south-west, a cool fill, a sky/ground gradient,
   // and one lamp over each site so the objective reads at a glance.
-  const sky = new THREE.HemisphereLight(new THREE.Color('#8a93b8'), new THREE.Color('#1a1512'), 0.9);
+  const sky = new THREE.HemisphereLight(new THREE.Color('#8a93b8'), new THREE.Color('#1a1512'), 1.5);
   scene.add(sky);
-  const key = new THREE.DirectionalLight(new THREE.Color('#ffd9a0'), 2.4);
+  const key = new THREE.DirectionalLight(new THREE.Color('#ffd9a0'), 3.2);
   key.position.set(-18, 26, 20);
   key.target.position.set(4, 0, -4);
   key.castShadow = true;
@@ -207,11 +207,11 @@ export function createWorld(scene) {
   key.shadow.camera.far = 80;
   key.shadow.bias = -0.0005;
   scene.add(key, key.target);
-  const fill = new THREE.DirectionalLight(new THREE.Color('#7fa8c9'), 0.5);
+  const fill = new THREE.DirectionalLight(new THREE.Color('#7fa8c9'), 0.8);
   fill.position.set(20, 14, -18);
   scene.add(fill);
   for (const site of Object.values(SITES)) {
-    const lamp = new THREE.PointLight(new THREE.Color(PALETTE.amber), 14, 14, 1.8);
+    const lamp = new THREE.PointLight(new THREE.Color(PALETTE.amber), 20, 14, 1.8);
     lamp.position.set(site.x, 4.5, site.z);
     scene.add(lamp);
   }

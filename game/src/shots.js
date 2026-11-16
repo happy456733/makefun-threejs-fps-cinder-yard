@@ -42,6 +42,7 @@ export function runShot(name, g) {
     state.timer = 5;
     state.round = 1;
     state.money = 4750;
+    arsenal.setVisible(true);
     player.reset(-22, 16, -0.15);
     arsenal.buy('kr47');
     arsenal.equip('kr47');
@@ -67,13 +68,15 @@ export function runShot(name, g) {
     state.wins.ember = 2;
     state.wins.warden = 1;
     state.money = 3250;
+    arsenal.setVisible(true);
     player.reset(0, 8, 0);
     player.setArmor(50);
     arsenal.buy('kr47');
     arsenal.equip('kr47');
-    // One defender holds the mid lane ahead, mid-strafe, in the crosshair.
+    // One defender pushes the open mid lane ahead, mid-strafe, in the crosshair —
+    // clear of the containers, so the fight reads at a glance.
     const foe = bots.byId('warden-0');
-    foe.position.set(1.5, 0, -7.5);
+    foe.position.set(3, 0, 1.5);
     foe.yaw = Math.PI;
     foe.group.rotation.y = Math.PI;
     foe.legL.rotation.x = 0.45;
@@ -81,17 +84,17 @@ export function runShot(name, g) {
     foe.body.position.y = 0.03;
     // A teammate pushes the west lane beside the player.
     const mate = bots.byId('ember-0');
-    mate.position.set(-5.5, 0, 3.5);
-    mate.yaw = -0.4;
-    mate.group.rotation.y = -0.4;
+    mate.position.set(-4.5, 0, 4.5);
+    mate.yaw = -0.5;
+    mate.group.rotation.y = -0.5;
     mate.legL.rotation.x = -0.4;
     mate.legR.rotation.x = 0.4;
-    g.aimAt(new THREE.Vector3(1.5, 1.15, -7.5));
-    // A tracer and an impact burst, frozen mid-flight: the fight is on.
+    g.aimAt(new THREE.Vector3(3, 1.15, 1.5));
+    // A tracer and a hit burst, frozen mid-flight: the fight is on.
     const muzzle = arsenal.muzzle(new THREE.Vector3());
-    const chest = new THREE.Vector3(1.5, 1.15, -7.5);
+    const chest = new THREE.Vector3(3, 1.15, 1.5);
     g.effects.tracer(muzzle, chest);
-    g.effects.impact(new THREE.Vector3(1.9, 1.3, -7.4));
+    g.effects.hitFlesh(new THREE.Vector3(3.1, 1.2, 1.5));
     state.feed.unshift(
       { killer: 'You', victim: 'Mira', headshot: true, weapon: 'KR-47', killerTeam: 'ember', victimTeam: 'warden' },
       { killer: 'Ash', victim: 'Juno', headshot: false, weapon: 'KR-47', killerTeam: 'ember', victimTeam: 'warden' },

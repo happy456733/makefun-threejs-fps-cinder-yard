@@ -270,9 +270,10 @@ export function createBots({ scene, world, nav, rng, combat, audio, state }) {
       bot.body.rotation.x = -bot.fall * 1.45;
       return;
     }
-    // Find a visible enemy: the player first, then the other side's bots.
+    // Find a visible enemy: WARDEN bots hunt the player and the EMBER bots; the
+    // EMBER bots hunt WARDEN only — the player is their teammate, never a target.
     let enemy = null;
-    if (canSee(bot, ctx.playerActor)) enemy = ctx.playerActor;
+    if (bot.team === 'warden' && canSee(bot, ctx.playerActor)) enemy = ctx.playerActor;
     if (!enemy) {
       for (const other of list) {
         if (other.team !== bot.team && other.alive && canSee(bot, other)) {
