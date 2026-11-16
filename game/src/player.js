@@ -34,6 +34,11 @@ export function createPlayer(colliders) {
   let health = 100;
   let armor = 0;
   let alive = true;
+  // Recoil is a separate layer on top of the aim: it kicks the view and then
+  // settles back, so a burst climbs and recovers instead of walking the player's
+  // aim permanently skyward. The aim itself (body.pitch/yaw) only moves by mouse.
+  let recoilPitch = 0;
+  let recoilYaw = 0;
 
   // lift keeps the feet and the crown out of the horizontal tests, so standing on the
   // floor is not read as walking into a wall.
@@ -50,11 +55,15 @@ export function createPlayer(colliders) {
   }
 
   function recoil(pitchKick, yawKick) {
-    body.pitch = Math.min(1.45, body.pitch + pitchKick);
-    body.yaw += yawKick;
+    recoilPitch = Math.min(0.45, recoilPitch + pitchKick);
+    recoilYaw = Math.max(-0.25, Math.min(0.25, recoilYaw + yawKick));
   }
 
   function step(dt, keys, frozen) {
+    // Recoil settles back to the aim within about half a second.
+    const decay = Math.exp(-6 * dt);
+    recoilPitch *= decay;
+    recoilYaw *= decay;
     const wantCrouch = keys.has('ControlLeft') || keys.has('ControlRight') || keys.has('KeyC');
     if (wantCrouch && !body.crouching) {
       body.crouching = true;
@@ -135,6 +144,13 @@ export function createPlayer(colliders) {
     step,
     look,
     recoil,
+    // What the camera shows: the aim plus the unsettled recoil on top of it.
+    viewPitch() {
+      return body.pitch + recoilPitch;
+    },
+    viewYaw() {
+      return body.yaw + recoilYaw;
+    },
     damage,
     groundSpeed() {
       return Math.hypot(body.velocity.x, body.velocity.z);
@@ -159,6 +175,8 @@ export function createPlayer(colliders) {
       body.velocity.set(0, 0, 0);
       body.yaw = yaw;
       body.pitch = 0;
+      recoilPitch = 0;
+      recoilYaw = 0;
       body.crouching = false;
       body.height = STAND_HEIGHT;
       body.eye = STAND_EYE;

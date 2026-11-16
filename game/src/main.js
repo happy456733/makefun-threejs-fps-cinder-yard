@@ -404,7 +404,7 @@ function syncCamera() {
   const shY = shakeAmp ? (rng.next() * 2 - 1) * shakeAmp * 0.02 : 0;
   if (player.alive) {
     camera.position.set(player.body.position.x, player.body.position.y + player.body.eye, player.body.position.z);
-    camera.rotation.set(player.body.pitch + shX, player.body.yaw + shY, 0, 'YXZ');
+    camera.rotation.set(player.viewPitch() + shX, player.viewYaw() + shY, 0, 'YXZ');
   } else {
     if (spectateTarget && !spectateTarget.alive) {
       spectateTarget = bots.list.find((bot) => bot.team === 'ember' && bot.alive) || null;

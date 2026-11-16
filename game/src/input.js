@@ -58,7 +58,12 @@ export function createInput(canvas, onLockChange) {
       if (document.pointerLockElement) document.exitPointerLock();
     },
     takeLook() {
-      const look = { x: state.lookX, y: state.lookY };
+      // Clamp each frame's look: no human flick moves 300 px in one frame, and a
+      // wild synthetic delta must never spin the view.
+      const look = {
+        x: Math.max(-300, Math.min(300, state.lookX)),
+        y: Math.max(-300, Math.min(300, state.lookY)),
+      };
       state.lookX = 0;
       state.lookY = 0;
       return look;
